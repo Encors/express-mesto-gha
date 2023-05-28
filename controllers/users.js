@@ -1,35 +1,94 @@
-/* eslint-disable no-console */
-const users = [];
-let id = 0;
+const usersModel = require('../models/users');
 
 const getUsers = (req, res) => {
-  res.send(users);
+  usersModel
+    .find({})
+    .then((users) => {
+      res.send(users);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: 'Произошла ошибка',
+        err: err.message,
+        stack: err.stack,
+      });
+    });
 };
 
 const getUserById = (req, res) => {
-  const user = users.find((u) => u.id === Number(req.params.id));
-  if (!user) {
-    return res.status(404).send({ message: 'User not found' });
-  }
-  return res.send(user);
+  usersModel
+    .findById(req.params.userId)
+    .then((user) => {
+      res.status(200).send(user);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: 'Произошла ошибка',
+        err: err.message,
+        stack: err.stack,
+      });
+    });
 };
 
 const createUser = (req, res) => {
-  id += 1;
+  usersModel
+    .create(req.body)
+    .then((user) => {
+      res.status(201).send(user);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: 'Произошла ошибка',
+        err: err.message,
+        stack: err.stack,
+      });
+    });
+};
 
-  console.log(req.body);
+const updateProfile = (req, res) => {
+  usersModel
+    .findByIdAndUpdate(req.user._id, req.body, {
+      new: true, // обработчик then получит на вход обновлённую запись
+      runValidators: true, // данные будут валидированы перед изменением
+    })
+    .then((user) => {
+      res.status(200).send(user);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: 'Произошла ошибка',
+        err: err.message,
+        stack: err.stack,
+      });
+    });
+};
 
-  const newUser = {
-    ...req.body,
-    id,
-  };
-
-  users.push(newUser);
-  res.send(newUser);
+const updateAvatar = (req, res) => {
+  usersModel
+    .findByIdAndUpdate(
+      req.user._id,
+      { avatar: req.body.avatar },
+      {
+        new: true, // обработчик then получит на вход обновлённую запись
+        runValidators: true, // данные будут валидированы перед изменением
+      },
+    )
+    .then((user) => {
+      res.status(200).send(user);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: 'Произошла ошибка',
+        err: err.message,
+        stack: err.stack,
+      });
+    });
 };
 
 module.exports = {
   getUsers,
   getUserById,
   createUser,
+  updateProfile,
+  updateAvatar,
 };
