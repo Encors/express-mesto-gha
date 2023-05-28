@@ -31,7 +31,7 @@ const createUser = async (req, res, next) => {
     res.status(201).send(user);
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
-      throw new BadRequestError('Переданы некорректные данные');
+      next(new BadRequestError('Переданы некорректные данные'));
     } else {
       next(err);
     }
@@ -49,7 +49,7 @@ const updateProfile = async (req, res, next) => {
     res.status(200).send(user);
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
-      throw new BadRequestError('Переданы некорректные данные');
+      next(new BadRequestError('Переданы некорректные данные'));
     } else {
       next(err);
     }
@@ -71,7 +71,7 @@ const updateAvatar = async (req, res, next) => {
     res.status(200).send(user);
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
-      throw new BadRequestError('Переданы некорректные данные');
+      next(new BadRequestError('Переданы некорректные данные'));
     } else {
       next(err);
     }

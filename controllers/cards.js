@@ -9,7 +9,7 @@ const getCards = async (req, res, next) => {
     res.send(cards);
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
-      throw new BadRequestError('Переданы некорректные данные');
+      next(new BadRequestError('Переданы некорректные данные'));
     } else {
       next(err);
     }
@@ -25,7 +25,7 @@ const createCard = async (req, res, next) => {
     res.status(200).send(card);
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
-      throw new BadRequestError('Переданы некорректные данные');
+      next(new BadRequestError('Переданы некорректные данные'));
     } else {
       next(err);
     }
@@ -55,7 +55,7 @@ const likeCard = async (req, res, next) => {
     res.status(200).send(card);
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
-      throw new BadRequestError('Переданы некорректные данные');
+      next(new BadRequestError('Переданы некорректные данные'));
     } else {
       next(err);
     }
@@ -72,7 +72,7 @@ const dislikeCard = async (req, res, next) => {
     res.status(200).send(card);
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
-      throw new BadRequestError('Переданы некорректные данные');
+      next(new BadRequestError('Переданы некорректные данные'));
     } else {
       next(err);
     }
