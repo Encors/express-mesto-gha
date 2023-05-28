@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const router = require('./routes/index');
+const handleErrors = require('./middlewares/handleErrors');
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 const app = express();
@@ -16,4 +17,6 @@ app.use((req, res, next) => {
 });
 
 app.use(router);
+
+app.use(handleErrors);
 app.listen(3000, () => {});

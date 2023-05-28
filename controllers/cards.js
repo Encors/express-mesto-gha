@@ -1,77 +1,82 @@
+const { default: mongoose } = require('mongoose');
 const cardsModel = require('../models/cards');
+const BadRequestError = require('../errors/BadRequestError');
+const NotFoundError = require('../errors/NotFoundError');
 
-const getCards = (req, res) => {
-  cardsModel
-    .find({})
-    .then((cards) => {
-      res.send(cards);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: 'Произошла ошибка',
-        err: err.message,
-        stack: err.stack,
-      });
-    });
+const getCards = async (req, res, next) => {
+  try {
+    const cards = await cardsModel.find({});
+    res.send(cards);
+  } catch (err) {
+    if (err instanceof mongoose.Error.ValidationError) {
+      throw new BadRequestError('Переданы некорректные данные');
+    } else {
+      next(err);
+    }
+  }
 };
 
-const createCard = (req, res) => {
-  cardsModel
-    .create({
+const createCard = async (req, res, next) => {
+  try {
+    const card = await cardsModel.create({
       owner: req.user._id,
       ...req.body,
-    })
-    .then((card) => {
-      res.status(201).send(card);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: 'Произошла ошибка',
-        err: err.message,
-        stack: err.stack,
-      });
     });
+    res.status(200).send(card);
+  } catch (err) {
+    if (err instanceof mongoose.Error.ValidationError) {
+      throw new BadRequestError('Переданы некорректные данные');
+    } else {
+      next(err);
+    }
+  }
 };
 
-const deleteCard = (req, res) => {
-  cardsModel
-    .findByIdAndRemove(req.params.cardId)
-    .then((card) => res.send(card))
-    .catch((err) => res.status(500).send({
-      message: 'Произошла ошибка',
-      err: err.message,
-      stack: err.stack,
-    }));
+const deleteCard = async (req, res, next) => {
+  try {
+    const card = await cardsModel
+      .findByIdAndRemove(req.params.cardId)
+      .orFail(new NotFoundError('Карточка не найдена'));
+    res.status(200).send(card);
+  } catch (err) {
+    next(err);
+  }
 };
 
-const likeCard = (req, res) => {
-  cardsModel
-    .findByIdAndUpdate(
-      req.params.cardId,
-      { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
-      { new: true },
-    )
-    .then((card) => res.send(card))
-    .catch((err) => res.status(500).send({
-      message: 'Произошла ошибка',
-      err: err.message,
-      stack: err.stack,
-    }));
+const likeCard = async (req, res, next) => {
+  try {
+    const card = await cardsModel
+      .findByIdAndUpdate(
+        req.params.cardId,
+        { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
+        { new: true },
+      )
+      .orFail(new NotFoundError('Карточка не найдена'));
+    res.status(200).send(card);
+  } catch (err) {
+    if (err instanceof mongoose.Error.ValidationError) {
+      throw new BadRequestError('Переданы некорректные данные');
+    } else {
+      next(err);
+    }
+  }
 };
 
-const dislikeCard = (req, res) => {
-  cardsModel
-    .findByIdAndUpdate(
+const dislikeCard = async (req, res, next) => {
+  try {
+    const card = await cardsModel.findByIdAndUpdate(
       req.params.cardId,
       { $pull: { likes: req.user._id } }, // убрать _id из массива
       { new: true },
-    )
-    .then((card) => res.send(card))
-    .catch((err) => res.status(500).send({
-      message: 'Произошла ошибка',
-      err: err.message,
-      stack: err.stack,
-    }));
+    );
+    res.status(200).send(card);
+  } catch (err) {
+    if (err instanceof mongoose.Error.ValidationError) {
+      throw new BadRequestError('Переданы некорректные данные');
+    } else {
+      next(err);
+    }
+  }
 };
 
 module.exports = {

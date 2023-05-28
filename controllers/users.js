@@ -1,88 +1,81 @@
+const { default: mongoose } = require('mongoose');
 const usersModel = require('../models/users');
+const BadRequestError = require('../errors/BadRequestError');
+const NotFoundError = require('../errors/NotFoundError');
 
-const getUsers = (req, res) => {
-  usersModel
-    .find({})
-    .then((users) => {
-      res.send(users);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: 'Произошла ошибка',
-        err: err.message,
-        stack: err.stack,
-      });
-    });
+const getUsers = async (req, res, next) => {
+  try {
+    const users = await usersModel
+      .find({})
+      .orFail(new BadRequestError('Переданы некорректные данные'));
+    res.send(users);
+  } catch (err) {
+    next(err);
+  }
 };
 
-const getUserById = (req, res) => {
-  usersModel
-    .findById(req.params.userId)
-    .then((user) => {
-      res.status(200).send(user);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: 'Произошла ошибка',
-        err: err.message,
-        stack: err.stack,
-      });
-    });
+const getUserById = async (req, res, next) => {
+  try {
+    const user = await usersModel
+      .findById(req.params.userId)
+      .orFail(new NotFoundError('Пользователь не найден'));
+    res.status(200).send(user);
+  } catch (err) {
+    next(err);
+  }
 };
 
-const createUser = (req, res) => {
-  usersModel
-    .create(req.body)
-    .then((user) => {
-      res.status(201).send(user);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: 'Произошла ошибка',
-        err: err.message,
-        stack: err.stack,
-      });
-    });
+const createUser = async (req, res, next) => {
+  try {
+    const user = await usersModel.create(req.body);
+    res.status(201).send(user);
+  } catch (err) {
+    if (err instanceof mongoose.Error.ValidationError) {
+      throw new BadRequestError('Переданы некорректные данные');
+    } else {
+      next(err);
+    }
+  }
 };
 
-const updateProfile = (req, res) => {
-  usersModel
-    .findByIdAndUpdate(req.user._id, req.body, {
-      new: true, // обработчик then получит на вход обновлённую запись
-      runValidators: true, // данные будут валидированы перед изменением
-    })
-    .then((user) => {
-      res.status(200).send(user);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: 'Произошла ошибка',
-        err: err.message,
-        stack: err.stack,
-      });
-    });
-};
-
-const updateAvatar = (req, res) => {
-  usersModel
-    .findByIdAndUpdate(
-      req.user._id,
-      { avatar: req.body.avatar },
-      {
+const updateProfile = async (req, res, next) => {
+  try {
+    const user = await usersModel
+      .findByIdAndUpdate(req.user._id, req.body, {
         new: true, // обработчик then получит на вход обновлённую запись
         runValidators: true, // данные будут валидированы перед изменением
-      },
-    )
-    .then((user) => {
-      res.status(200).send(user);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: 'Произошла ошибка',
-        err: err.message,
-        stack: err.stack,
-      });
-    });
+      })
+      .orFail(new NotFoundError('Пользователь не найден'));
+    res.status(200).send(user);
+  } catch (err) {
+    if (err instanceof mongoose.Error.ValidationError) {
+      throw new BadRequestError('Переданы некорректные данные');
+    } else {
+      next(err);
+    }
+  }
+};
+
+const updateAvatar = async (req, res, next) => {
+  try {
+    const user = await usersModel
+      .findByIdAndUpdate(
+        req.user._id,
+        { avatar: req.body.avatar },
+        {
+          new: true, // обработчик then получит на вход обновлённую запись
+          runValidators: true, // данные будут валидированы перед изменением
+        },
+      )
+      .orFail(new NotFoundError('Пользователь не найден'));
+    res.status(200).send(user);
+  } catch (err) {
+    if (err instanceof mongoose.Error.ValidationError) {
+      throw new BadRequestError('Переданы некорректные данные');
+    } else {
+      next(err);
+    }
+  }
 };
 
 module.exports = {
