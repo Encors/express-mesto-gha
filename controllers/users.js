@@ -21,7 +21,11 @@ const getUserById = async (req, res, next) => {
       .orFail(new NotFoundError('Пользователь не найден'));
     res.status(200).send(user);
   } catch (err) {
-    next(err);
+    if (err instanceof mongoose.Error.CastError) {
+      next(new BadRequestError('Переданы некорректные данные'));
+    } else {
+      next(err);
+    }
   }
 };
 

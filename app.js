@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const router = require('./routes/index');
 const handleErrors = require('./middlewares/handleErrors');
+const NotFoundError = require('./errors/NotFoundError');
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 const app = express();
@@ -17,6 +18,10 @@ app.use((req, res, next) => {
 });
 
 app.use(router);
+
+app.use((req, res) => {
+  throw new NotFoundError('Страница не найдена');
+});
 
 app.use(handleErrors);
 app.listen(3000, () => {});

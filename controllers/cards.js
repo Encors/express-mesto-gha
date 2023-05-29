@@ -54,7 +54,7 @@ const likeCard = async (req, res, next) => {
       .orFail(new NotFoundError('Карточка не найдена'));
     res.status(200).send(card);
   } catch (err) {
-    if (err instanceof mongoose.Error.ValidationError) {
+    if (err instanceof mongoose.Error.CastError) {
       next(new BadRequestError('Переданы некорректные данные'));
     } else {
       next(err);
@@ -68,10 +68,11 @@ const dislikeCard = async (req, res, next) => {
       req.params.cardId,
       { $pull: { likes: req.user._id } }, // убрать _id из массива
       { new: true },
-    );
+    )
+      .orFail(new NotFoundError('Карточка не найдена'));
     res.status(200).send(card);
   } catch (err) {
-    if (err instanceof mongoose.Error.ValidationError) {
+    if (err instanceof mongoose.Error.CastError) {
       next(new BadRequestError('Переданы некорректные данные'));
     } else {
       next(err);
