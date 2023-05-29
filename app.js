@@ -19,7 +19,7 @@ app.use((req, res, next) => {
 
 app.use(router);
 
-app.use((req, res) => {
+app.use(() => {
   throw new NotFoundError('Страница не найдена');
 });
 
