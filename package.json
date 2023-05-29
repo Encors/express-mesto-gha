@@ -1,5 +1,5 @@
 {
-  "name": "new-proj",
+  "name": "start back-end",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -7,7 +7,7 @@
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
-  "author": "",
+  "author": "Akaeva Diana",
   "license": "ISC",
   "description": "",
   "devDependencies": {
