@@ -39,7 +39,11 @@ const deleteCard = async (req, res, next) => {
       .orFail(new NotFoundError('Карточка не найдена'));
     res.status(200).send(card);
   } catch (err) {
-    next(err);
+    if (err instanceof mongoose.Error.CastError) {
+      next(new BadRequestError('Переданы некорректные данные'));
+    } else {
+      next(err);
+    }
   }
 };
 
