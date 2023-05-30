@@ -19,8 +19,8 @@ app.use((req, res, next) => {
 
 app.use(router);
 
-app.use(() => {
-  throw new NotFoundError('Страница не найдена');
+app.use((req, res, next) => {
+  next(new NotFoundError('Страница не найдена'));
 });
 
 app.use(handleErrors);
