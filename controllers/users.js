@@ -54,7 +54,15 @@ const createUser = async (req, res, next) => {
       about: req.body.about,
       avatar: req.body.avatar,
     });
-    res.status(HTTP_STATUS_CREATED).send({ user });
+    res
+      .status(HTTP_STATUS_CREATED)
+      .send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        _id: user._id,
+        email: user.email,
+      });
   } catch (err) {
     if (err.code === DUPLICATE_KEY_ERROR) {
       next(new ConflictError('Такой пользователь уже существует'));
