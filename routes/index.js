@@ -11,7 +11,6 @@ const {
 router.post(
   '/signup',
   validateUserBody,
-  validateUserAvatar,
   usersController.createUser,
 );
 router.post('/signin', validateUserBody, usersController.loginUser);
