@@ -3,6 +3,7 @@ const { HTTP_STATUS_OK, HTTP_STATUS_CREATED } = require('http2').constants;
 const cardsModel = require('../models/cards');
 const BadRequestError = require('../errors/BadRequestError');
 const NotFoundError = require('../errors/NotFoundError');
+const ForbiddenError = require('../errors/ForbiddenError');
 
 const getCards = async (req, res, next) => {
   try {
@@ -37,9 +38,16 @@ const createCard = async (req, res, next) => {
 const deleteCard = async (req, res, next) => {
   try {
     const card = await cardsModel
-      .findByIdAndRemove(req.params.cardId)
+      .findById(req.params.cardId)
       .orFail(new NotFoundError('Карточка не найдена'));
-    res.status(HTTP_STATUS_OK).send(card);
+
+    const owner = card.owner.toString();
+    if (req.user._id === owner) {
+      const deletedCard = await cardsModel.deleteOne(card);
+      res.status(HTTP_STATUS_OK).send(deletedCard);
+    } else {
+      next(new ForbiddenError('Чужую карточку удалить нельзя'));
+    }
   } catch (err) {
     if (err instanceof mongoose.Error.CastError) {
       next(new BadRequestError('Переданы некорректные данные'));

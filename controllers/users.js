@@ -33,6 +33,17 @@ const getUserById = async (req, res, next) => {
   }
 };
 
+const getUser = async (req, res, next) => {
+  try {
+    const user = await usersModel
+      .findById(req.user._id)
+      .orFail(new NotFoundError('Пользователь не найден'));
+    res.status(HTTP_STATUS_OK).send(user);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const createUser = async (req, res, next) => {
   try {
     const hash = await bcrypt.hash(req.body.password, 10);
@@ -115,6 +126,7 @@ const loginUser = async (req, res, next) => {
 module.exports = {
   getUsers,
   getUserById,
+  getUser,
   createUser,
   updateProfile,
   updateAvatar,

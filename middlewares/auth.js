@@ -3,7 +3,7 @@ const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const extractBearerToken = (header) => header.replace('Bearer ', '');
 
-const signToken = (payload) => jwt.sign(payload, 'some-secret-key');
+const signToken = (payload) => jwt.sign(payload, 'some-secret-key', { expiresIn: '7d' });
 
 const checkToken = (token) => jwt.verify(token, 'some-secret-key');
 

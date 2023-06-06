@@ -27,7 +27,8 @@
     "express-rate-limit": "^6.7.0",
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.0",
-    "mongoose": "^7.2.1"
+    "mongoose": "^7.2.1",
+    "validator": "^13.9.0"
   },
   "prettier": {
     "singleQuote": true,
