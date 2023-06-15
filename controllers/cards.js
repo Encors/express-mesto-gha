@@ -10,14 +10,9 @@ const getCards = async (req, res, next) => {
     const cards = await cardsModel.find({});
     res.send(cards);
   } catch (err) {
-    if (err instanceof mongoose.Error.ValidationError) {
-      next(new BadRequestError('Переданы некорректные данные'));
-    } else {
-      next(err);
-    }
+    next(err);
   }
 };
-
 const createCard = async (req, res, next) => {
   try {
     const card = await cardsModel.create({

@@ -1,4 +1,6 @@
-const { HTTP_STATUS_INTERNAL_SERVER_ERROR } = require('../errors/errors_constants');
+const {
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+} = require('../errors/errors_constants');
 
 // eslint-disable-next-line no-unused-vars
 const handleErrors = (err, req, res, next) => {

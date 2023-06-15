@@ -11,7 +11,7 @@ const auth = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    next(new UnauthorizedError('Необходима авторизация'));
+    return next(new UnauthorizedError('Необходима авторизация'));
   }
 
   const token = extractBearerToken(authorization);
@@ -20,10 +20,10 @@ const auth = (req, res, next) => {
   try {
     payload = checkToken(token);
   } catch (err) {
-    next(new UnauthorizedError('Необходима авторизация'));
+    return next(new UnauthorizedError('Необходима авторизация'));
   }
 
-  req.user = payload; // записываем пейлоуд в объект запроса
+  req.user = payload;
 
   next();
 };

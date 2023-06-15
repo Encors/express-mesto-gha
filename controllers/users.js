@@ -18,11 +18,16 @@ const getUsers = async (req, res, next) => {
   }
 };
 
+const findUser = async (id) => {
+  const user = await usersModel
+    .findById(id)
+    .orFail(new NotFoundError('Пользователь не найден'));
+  return user;
+};
+
 const getUserById = async (req, res, next) => {
   try {
-    const user = await usersModel
-      .findById(req.params.userId)
-      .orFail(new NotFoundError('Пользователь не найден'));
+    const user = await findUser(req.params.userId);
     res.status(HTTP_STATUS_OK).send(user);
   } catch (err) {
     if (err instanceof mongoose.Error.CastError) {
@@ -35,9 +40,7 @@ const getUserById = async (req, res, next) => {
 
 const getUser = async (req, res, next) => {
   try {
-    const user = await usersModel
-      .findById(req.user._id)
-      .orFail(new NotFoundError('Пользователь не найден'));
+    const user = await findUser(req.user._id);
     res.status(HTTP_STATUS_OK).send(user);
   } catch (err) {
     next(err);
@@ -54,15 +57,13 @@ const createUser = async (req, res, next) => {
       about: req.body.about,
       avatar: req.body.avatar,
     });
-    res
-      .status(HTTP_STATUS_CREATED)
-      .send({
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        _id: user._id,
-        email: user.email,
-      });
+    res.status(HTTP_STATUS_CREATED).send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      _id: user._id,
+      email: user.email,
+    });
   } catch (err) {
     if (err.code === DUPLICATE_KEY_ERROR) {
       next(new ConflictError('Такой пользователь уже существует'));
@@ -74,14 +75,20 @@ const createUser = async (req, res, next) => {
   }
 };
 
+const updateData = async (id, data) => {
+  const user = await usersModel
+    .findByIdAndUpdate(id, data, {
+      new: true, // обработчик then получит на вход обновлённую запись
+      runValidators: true, // данные будут валидированы перед изменением
+    })
+    .orFail(new NotFoundError('Пользователь не найден'));
+  return user;
+};
+
+// функция-декоратор
 const updateProfile = async (req, res, next) => {
   try {
-    const user = await usersModel
-      .findByIdAndUpdate(req.user._id, req.body, {
-        new: true, // обработчик then получит на вход обновлённую запись
-        runValidators: true, // данные будут валидированы перед изменением
-      })
-      .orFail(new NotFoundError('Пользователь не найден'));
+    const user = await updateData(req.user._id, req.body);
     res.status(HTTP_STATUS_OK).send(user);
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
@@ -92,18 +99,10 @@ const updateProfile = async (req, res, next) => {
   }
 };
 
+// функция-декоратор
 const updateAvatar = async (req, res, next) => {
   try {
-    const user = await usersModel
-      .findByIdAndUpdate(
-        req.user._id,
-        { avatar: req.body.avatar },
-        {
-          new: true, // обработчик then получит на вход обновлённую запись
-          runValidators: true, // данные будут валидированы перед изменением
-        },
-      )
-      .orFail(new NotFoundError('Пользователь не найден'));
+    const user = await updateData(req.user._id, { avatar: req.body.avatar });
     res.status(HTTP_STATUS_OK).send(user);
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
