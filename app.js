@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 const router = require('./routes/index');
 const handleErrors = require('./middlewares/handleErrors');
 const NotFoundError = require('./errors/NotFoundError');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 const app = express();
@@ -18,16 +19,20 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
+
 app.use(express.json());
 
 app.use(helmet());
+app.use(requestLogger);
+
 app.use(router);
 
-app.use(errors());
+app.use(errorLogger);
 
+app.use(errors());
 app.use((req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 });
 
 app.use(handleErrors);
-app.listen(3000, () => {});
+module.exports = app;
